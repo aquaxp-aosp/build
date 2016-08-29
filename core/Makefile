@@ -889,13 +889,6 @@ endif
 #   b) We build a single image that contains boot and recovery both
 #      (BOARD_USES_RECOVERY_AS_BOOT = true).
 
-ifeq (,$(filter true, $(BOARD_USES_FULL_RECOVERY_IMAGE) $(BOARD_USES_RECOVERY_AS_BOOT)))
-# Named '.dat' so we don't attempt to use imgdiff for patching it.
-RECOVERY_RESOURCE_ZIP := $(TARGET_OUT)/etc/recovery-resource.dat
-else
-RECOVERY_RESOURCE_ZIP :=
-endif
-
 ifeq ($(TARGET_PRIVATE_RES_DIRS),)
   $(info No private recovery resources for TARGET_DEVICE $(TARGET_DEVICE))
 endif
@@ -1833,7 +1826,7 @@ name := $(TARGET_PRODUCT)
 ifeq ($(TARGET_BUILD_TYPE),debug)
   name := $(name)_debug
 endif
-name := $(name)-ota-$(FILE_NAME_TAG)
+name := $(name)-$(shell date -u +%Y%m%d)-ota-$(FILE_NAME_TAG)
 
 INTERNAL_OTA_PACKAGE_TARGET := $(PRODUCT_OUT)/$(name).zip
 
@@ -1843,14 +1836,14 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE)
 	@echo "Package OTA: $@"
 	$(hide) PATH=$(foreach p,$(INTERNAL_USERIMAGES_BINARY_PATHS),$(p):)$$PATH MKBOOTIMG=$(MKBOOTIMG) \
 	   ./build/tools/releasetools/ota_from_target_files -v \
-	   --block \
 	   -p $(HOST_OUT) \
 	   -k $(KEY_CERT_PAIR) \
 	   $(if $(OEM_OTA_CONFIG), -o $(OEM_OTA_CONFIG)) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
-.PHONY: otapackage
+.PHONY: otapackage bacon
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
+bacon: otapackage
 
 endif    # build_ota_package
 
