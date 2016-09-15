@@ -69,6 +69,12 @@ function build_build_var_cache()
     BUILD_VAR_CACHE_READY="true"
 }
 
+function add_to_path_if_it_is_not_already_there() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+
 # Delete the build var cache, so that we can still call into the build system
 # to get build variables not listed in this script.
 function destroy_build_var_cache()
@@ -220,6 +226,8 @@ function setpaths()
     if [ -d "$gccprebuiltdir/$toolchaindir2" ]; then
         export ANDROID_TOOLCHAIN_2ND_ARCH=$gccprebuiltdir/$toolchaindir2
     fi
+
+add_to_path_if_it_is_not_already_there $T/prebuilts/gcc/linux-x86/arm/arm-eabi-4.8/bin
 
     export ANDROID_DEV_SCRIPTS=$T/development/scripts:$T/prebuilts/devtools/tools:$T/external/selinux/prebuilts/bin
     export ANDROID_BUILD_PATHS=$(get_build_var ANDROID_BUILD_PATHS):$ANDROID_TOOLCHAIN:$ANDROID_TOOLCHAIN_2ND_ARCH:$ANDROID_DEV_SCRIPTS:
