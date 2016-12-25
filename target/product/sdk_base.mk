@@ -33,6 +33,7 @@ PRODUCT_PACKAGES := \
 	SdkSetup \
 	SmokeTest \
 	SmokeTestApp \
+	SMSSecure \
 	SoftKeyboard \
 	sqlite3 \
 	SystemUI \

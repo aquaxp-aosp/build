@@ -21,6 +21,8 @@
 # core_tiny.mk in addition to core_minimal.mk.
 
 PRODUCT_PACKAGES += \
+    Browser2 \
+    Calendar \
     BasicDreams \
     BlockedNumberProvider \
     BookmarkProvider \
