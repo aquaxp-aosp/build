@@ -56,7 +56,7 @@ else
     TARGET_PREBUILT_INT_KERNEL_TYPE := Image
   else
     ifeq ($(TARGET_KERNEL_ARCH),arm64)
-      TARGET_PREBUILT_INT_KERNEL_TYPE := Image.gz-dtb
+      TARGET_PREBUILT_INT_KERNEL_TYPE := Image.gz
     else
       TARGET_PREBUILT_INT_KERNEL_TYPE := zImage
     endif
