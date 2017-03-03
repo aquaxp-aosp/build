@@ -134,6 +134,14 @@ function check_product()
         echo "Couldn't locate the top of the tree.  Try setting TOP." >&2
         return
     fi
+
+    if (echo -n $1 | grep -q -e "^aosp_") ; then
+        CUSTOM_BUILD=
+    else
+        CUSTOM_BUILD=$1
+    fi
+    export CUSTOM_BUILD
+
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
         TARGET_BUILD_TYPE= \
@@ -526,19 +534,80 @@ function print_lunch_menu()
     local uname=$(uname)
     echo
     echo "You're building on" $uname
+    if [ "$(uname)" = "Darwin" ] ; then
+       echo "  (ohai, iSheep!!)"
+    fi
     echo
-    echo "Lunch menu... pick a combo:"
+    if [ "z${CUSTOM_DEVICES_ONLY}" != "z" ]; then
+       echo "Breakfast menu... pick a combo:"
+       echo " "
+    else
+       echo "Lunch menu... pick a combo:"
+       echo " "
+    fi
 
     local i=1
     local choice
     for choice in ${LUNCH_MENU_CHOICES[@]}
     do
-        echo "     $i. $choice"
+        echo " $i. $choice "
         i=$(($i+1))
     done
 
+    if [ "z${CUSTOM_DEVICES_ONLY}" != "z" ]; then
+       echo " "
+       echo "... time to mka bacon!!"
+    fi
+
     echo
 }
+
+function brunch()
+{
+    breakfast $*
+    if [ $? -eq 0 ]; then
+        time mka bacon
+    else
+        echo "No such item in brunch menu. Try 'breakfast'"
+        return 1
+    fi
+    return $?
+}
+
+function breakfast()
+{
+    target=$1
+    local variant=$2
+    CUSTOM_DEVICES_ONLY="true"
+    unset LUNCH_MENU_CHOICES
+    for f in `/bin/ls vendor/pure/vendorsetup.sh 2> /dev/null`
+        do
+            echo "including $f"
+            . $f
+        done
+    unset f
+
+    if [ $# -eq 0 ]; then
+        # No arguments, so let's have the full menu
+        lunch
+    else
+        echo "z$target" | grep -q "-"
+        if [ $? -eq 0 ]; then
+            # A buildtype was specified, assume a full device name
+            lunch $target
+        else
+            # This is probably just the model name
+            if [ -z "$variant" ]; then
+                variant="userdebug"
+            fi
+            lunch $target-$variant
+        fi
+    fi
+    return $?
+}
+
+alias bib=breakfast
+
 
 function lunch()
 {
@@ -588,6 +657,7 @@ function lunch()
     fi
 
     local product=$(echo -n $selection | sed -e "s/-.*$//")
+    check_product $product
     TARGET_PRODUCT=$product \
     TARGET_BUILD_VARIANT=$variant \
     build_build_var_cache
